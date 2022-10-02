@@ -1,0 +1,103 @@
+---
+title: "viz_part_1"
+author: "Jiayi Yang"
+date: "2022-10-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## import data
+
+```{r}
+library(tidyverse)
+library(ggridges)
+```
+
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USC00519397", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USC00519397 = "Waikiki_HA",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+```
+
+let's make a scatterplot
+
+```{r}
+ggplot(weather_df, aes (x = tmin, y = tmax)) +
+  geom_point()
+```
+
+Let's make the same scatterplot but different
+
+```{r}
+
+weather_df %>% 
+  drop_na() %>% 
+  filter (name == "CentralPark_NY") %>% 
+  ggplot(aes (x = tmin, y = tmax)) +
+  geom_point()
+```
+
+Let's make the same scatterplot but different
+```{r}
+weather_scatterplot = 
+  weather_df %>% 
+  drop_na() %>% 
+  ggplot(aes(x = tmin, y = tmax))
+
+weather_scatterplot +
+  geom_point()
+```
+## Let's fancy this up a bit
+
+```{r}
+weather_df %>% 
+  ggplot(aes (x = tmin, y = tmax, color = name)) +
+  geom_point(alpha = .3) +
+  geom_smooth(se = FALSE)
+```
+
+Maybe make seperate panels
+
+```{r}
+weather_df %>% 
+  ggplot(aes (x = tmin, y = tmax, color = name)) +
+  geom_point(alpha = .3) +
+  geom_smooth(se = FALSE) +
+  facet_grid(. ~ name)
+
+```
+
+`tmax` and `tmin` is boring, let's spice it up some.
+```{r}
+
+weather_df %>% 
+  ggplot(aes(x = date, y = tmax, size = prcp, color = name)) +
+  geom_point (alpha = .3) +
+  geom_smooth (se = FALSE) +
+  facet_grid (. ~ name)
+```
+
+## some quick stuff
+```{r}
+
+weather_df %>% 
+  ggplot (aes(x = tmin, y = tmax)) +
+  geom_hex()
+  
+```
+
