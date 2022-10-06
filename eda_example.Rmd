@@ -132,3 +132,27 @@ weather_df %>%
     geom_point() 
 ```
 
+Window function: lagged observation
+```{r}
+weather_df %>% 
+  group_by(name) %>% 
+  mutate(
+    yesterday_tmax = lag(tmax),
+    tmax_change = tmax - yesterday_tmax
+  ) %>% 
+  summarize(
+    sd_tmax_change = sd(tmax_change, na.rm = TRUE)
+  )
+```
+
+Window function: 
+```{r}
+weather_df %>%  
+  group_by(name, month) %>% 
+  mutate(
+    tmax_rank = min_rank(tmax)
+  ) %>% 
+  filter(tmax_rank < 4) %>% 
+  arrange(name, month, tmax_rank)
+```
+

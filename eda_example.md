@@ -300,3 +300,52 @@ weather_df %>%
     ## Warning: Removed 3 rows containing missing values (geom_point).
 
 ![](eda_example_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
+Window function: lagged observation
+
+``` r
+weather_df %>% 
+  group_by(name) %>% 
+  mutate(
+    yesterday_tmax = lag(tmax),
+    tmax_change = tmax - yesterday_tmax
+  ) %>% 
+  summarize(
+    sd_tmax_change = sd(tmax_change, na.rm = TRUE)
+  )
+```
+
+    ## # A tibble: 3 × 2
+    ##   name           sd_tmax_change
+    ##   <chr>                   <dbl>
+    ## 1 CentralPark_NY           4.45
+    ## 2 Waikiki_HA               1.23
+    ## 3 Waterhole_WA             3.13
+
+Window function:
+
+``` r
+weather_df %>%  
+  group_by(name, month) %>% 
+  mutate(
+    tmax_rank = min_rank(tmax)
+  ) %>% 
+  filter(tmax_rank < 4) %>% 
+  arrange(name, month, tmax_rank)
+```
+
+    ## # A tibble: 128 × 8
+    ## # Groups:   name, month [36]
+    ##    name           id          date        prcp  tmax  tmin month      tmax_rank
+    ##    <chr>          <chr>       <date>     <dbl> <dbl> <dbl> <date>         <int>
+    ##  1 CentralPark_NY USW00094728 2017-01-09     0  -4.9  -9.9 2017-01-01         1
+    ##  2 CentralPark_NY USW00094728 2017-01-08     0  -3.8  -8.8 2017-01-01         2
+    ##  3 CentralPark_NY USW00094728 2017-01-07    81  -3.2  -6.6 2017-01-01         3
+    ##  4 CentralPark_NY USW00094728 2017-02-10     0   0    -7.1 2017-02-01         1
+    ##  5 CentralPark_NY USW00094728 2017-02-03     0   0.6  -3.2 2017-02-01         2
+    ##  6 CentralPark_NY USW00094728 2017-02-04     0   1.1  -5.5 2017-02-01         3
+    ##  7 CentralPark_NY USW00094728 2017-03-15     0  -3.2  -6.6 2017-03-01         1
+    ##  8 CentralPark_NY USW00094728 2017-03-11     0  -1.6  -8.2 2017-03-01         2
+    ##  9 CentralPark_NY USW00094728 2017-03-12     0  -1.6  -7.1 2017-03-01         2
+    ## 10 CentralPark_NY USW00094728 2017-04-01     0   8.9   2.8 2017-04-01         1
+    ## # … with 118 more rows
